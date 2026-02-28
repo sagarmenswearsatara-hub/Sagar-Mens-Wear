@@ -1,30 +1,55 @@
-let currentProduct = {};
-
-// Open product page
+// ================= OPEN PRODUCT PAGE =================
 function openProduct(name, price, img){
-  const productData = { name, price, img };
-  localStorage.setItem("selectedProduct", JSON.stringify(productData));
-  window.location.href = "product.html";
+
+  // Automatically detect current folder
+  const basePath = window.location.pathname.substring(
+    0,
+    window.location.pathname.lastIndexOf("/") + 1
+  );
+
+  const baseURL = window.location.origin + basePath;
+
+  const url =
+    baseURL +
+    "product.html?name=" + encodeURIComponent(name) +
+    "&price=" + encodeURIComponent(price) +
+    "&img=" + encodeURIComponent(img);
+
+  window.location.href = url;
 }
 
-// Share
-function shareProduct(event, name, price){
+
+// ================= SHARE PRODUCT =================
+function shareProduct(event, name, price, img){
+
   event.stopPropagation();
 
-  const shareData = {
-    title: name,
-    text: `Check out this product 👕\n${name}\nPrice: ₹${price}`,
-    url: window.location.origin + "/product.html"
-  };
+  const basePath = window.location.pathname.substring(
+    0,
+    window.location.pathname.lastIndexOf("/") + 1
+  );
+
+  const baseURL = window.location.origin + basePath;
+
+  const shareURL =
+    baseURL +
+    "product.html?name=" + encodeURIComponent(name) +
+    "&price=" + encodeURIComponent(price) +
+    "&img=" + encodeURIComponent(img);
 
   if (navigator.share) {
-    navigator.share(shareData);
+    navigator.share({
+      title: name,
+      text: `Check out this product 👕\n${name}\nPrice: ₹${price}`,
+      url: shareURL
+    });
   } else {
     alert("Sharing not supported on this device.");
   }
 }
 
-// Load Products
+
+// ================= LOAD PRODUCTS =================
 const sheetURL =
 "https://docs.google.com/spreadsheets/d/1Cx6L_shglPh3mAHyELM6TK3148Jq7vnnsuqRE5OBZQ4/gviz/tq?tqx=out:json";
 
@@ -56,9 +81,8 @@ fetch(sheetURL)
 
         <img src="${img}" class="card-img-top">
 
-        <!-- SHARE BUTTON -->
         <button class="share-btn"
-          onclick="shareProduct(event,'${safeName}','${price}')">
+          onclick="shareProduct(event,'${safeName}','${price}','${img}')">
           ↗
         </button>
 
@@ -78,4 +102,4 @@ fetch(sheetURL)
   document.getElementById("products-list").innerHTML = html;
 
 })
-.catch(err => console.error(err));
+.catch(err => console.error("Error loading products:", err));
